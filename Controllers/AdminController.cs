@@ -7,7 +7,7 @@ using P2PLendingAPI.Services.Interfaces;
 namespace P2PLendingAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/admin")]
     [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {

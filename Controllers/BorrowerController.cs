@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace P2PLendingAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/borrower")]
     [Authorize(Roles = "Borrower")]
     public class BorrowerController : ControllerBase
     {

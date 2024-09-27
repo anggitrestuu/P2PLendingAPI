@@ -6,7 +6,7 @@ using P2PLendingAPI.Services.Interfaces;
 namespace P2PLendingAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;

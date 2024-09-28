@@ -82,6 +82,7 @@ namespace P2PLendingAPI.Services
             var loan = _mapper.Map<Loan>(createLoanDto);
             loan.Id = Guid.NewGuid().ToString();
             loan.Status = "requested";
+            loan.Duration = 12;
             loan.CreatedAt = DateTime.UtcNow;
             loan.UpdatedAt = DateTime.UtcNow;
 

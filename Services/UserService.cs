@@ -81,5 +81,12 @@ namespace P2PLendingAPI.Services
 
             await _userRepository.UpdateAsync(user);
         }
+
+        // GetByEmailAndRoleAsync
+        public async Task<UserDto> GetByEmailAndRoleAsync(string email, string role)
+        {
+            var user = await _userRepository.GetByEmailAndRoleAsync(email, role);
+            return _mapper.Map<UserDto>(user);
+        }
     }
 }

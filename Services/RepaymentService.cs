@@ -90,5 +90,54 @@ namespace P2PLendingAPI.Services
 
             return _mapper.Map<RepaymentDto>(createdRepayment);
         }
+
+        public async Task RepayLoanAsync(string loanId, string borrowerId, decimal amount)
+        {
+            var loan = await _loanRepository.GetByIdAsync(loanId);
+            if (loan == null)
+                throw new KeyNotFoundException("Loan not found");
+
+            if (loan.BorrowerId != borrowerId)
+                throw new UnauthorizedAccessException("You are not authorized to repay this loan");
+
+            if (loan.Status != "funded")
+                throw new InvalidOperationException("This loan cannot be repaid at this time");
+
+            var borrower = await _userRepository.GetByIdAsync(borrowerId);
+            if (borrower.Balance < amount)
+                throw new InvalidOperationException("Insufficient balance");
+
+            var totalRepaid = await _repaymentRepository.GetTotalRepaidForLoanAsync(loanId);
+            var remainingAmount = loan.Amount + (loan.Amount * loan.InterestRate / 100) - totalRepaid;
+
+            if (amount > remainingAmount)
+                throw new InvalidOperationException("Repayment amount exceeds the remaining balance");
+
+            var repayment = new Repayment
+            {
+                Id = Guid.NewGuid().ToString(),
+                LoanId = loanId,
+                Amount = amount,
+                RepaidAmount = amount,
+                BalanceAmount = remainingAmount - amount,
+                RepaidStatus = remainingAmount - amount == 0 ? "full" : "partial",
+                PaidAt = DateTime.UtcNow
+            };
+
+            await _repaymentRepository.CreateAsync(repayment);
+
+            borrower.Balance -= amount;
+            await _userRepository.UpdateAsync(borrower);
+
+            var lender = await _userRepository.GetByIdAsync(loan.LenderId);
+            lender.Balance += amount;
+            await _userRepository.UpdateAsync(lender);
+
+            if (repayment.RepaidStatus == "full")
+            {
+                loan.Status = "repaid";
+                await _loanRepository.UpdateAsync(loan);
+            }
+        }
     }
 }

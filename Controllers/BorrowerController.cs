@@ -2,7 +2,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P2PLendingAPI.Services.Interfaces;
+using P2PLendingAPI.DTOs;
 using System.Security.Claims;
+
 
 namespace P2PLendingAPI.Controllers
 {
@@ -43,6 +45,67 @@ namespace P2PLendingAPI.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var user = await _userService.GetByIdAsync(userId);
             return Ok(new { Balance = user.Balance });
+        }
+
+        [HttpPost("request-loan")]
+        public async Task<IActionResult> RequestLoan(CreateLoanDto createLoanDto)
+        {
+            var borrowerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (borrowerId == null)
+                return Unauthorized();
+
+            createLoanDto.BorrowerId = borrowerId;
+
+            // get lender by LenderEmail
+            var lender = await _userService.GetByEmailAndRoleAsync(createLoanDto.LenderEmail, "Lender");
+            if (lender == null)
+                return BadRequest("Lender not found");
+
+            createLoanDto.LenderId = lender.Id;
+            createLoanDto.Status = "Requested";
+
+
+            try
+            {
+                var loan = await _loanService.CreateLoanRequestAsync(createLoanDto);
+                return CreatedAtAction(nameof(GetLoanDetails), new { id = loan.Id }, loan);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("loans/{id}")]
+        public async Task<IActionResult> GetLoanDetails(string id)
+        {
+            var loan = await _loanService.GetByIdAsync(id);
+            if (loan == null)
+                return NotFound();
+
+            var borrowerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (borrowerId != loan.BorrowerId)
+                return Forbid();
+
+            return Ok(loan);
+        }
+
+        [HttpPost("loans/{id}/repay")]
+        public async Task<IActionResult> RepayLoan(string id, RepayLoanDto repayLoanDto)
+        {
+            var borrowerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (borrowerId == null)
+                return Unauthorized();
+
+            try
+            {
+                await _repaymentService.RepayLoanAsync(id, borrowerId, repayLoanDto.Amount);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

@@ -53,5 +53,11 @@ namespace P2PLendingAPI.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        // GetByEmailAndRoleAsync
+        public async Task<User> GetByEmailAndRoleAsync(string email, string role)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.Role == role);
+        }
     }
 }

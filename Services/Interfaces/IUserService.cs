@@ -13,5 +13,6 @@ namespace P2PLendingAPI.Services.Interfaces
         Task UpdateAsync(string id, UpdateUserDto updateUserDto);
         Task DeleteAsync(string id);
         Task UpdateBalanceAsync(string id, decimal amount);
+        Task<UserDto> GetByEmailAndRoleAsync(string email, string role);
     }
 }

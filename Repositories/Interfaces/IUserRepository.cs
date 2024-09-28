@@ -12,5 +12,6 @@ namespace P2PLendingAPI.Repositories.Interfaces
         Task<User> CreateAsync(User user);
         Task UpdateAsync(User user);
         Task DeleteAsync(string id);
+        Task<User> GetByEmailAndRoleAsync(string email, string role);
     }
 }

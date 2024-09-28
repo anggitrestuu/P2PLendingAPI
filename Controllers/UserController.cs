@@ -7,7 +7,6 @@ using P2PLendingAPI.Services.Interfaces;
 
 namespace P2PLendingAPI.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiController]
     [Route("api/user")]
     [Authorize(Roles = "Admin")]

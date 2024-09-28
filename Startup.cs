@@ -32,6 +32,18 @@ namespace P2PLendingAPI
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddCors(options =>
+            {
+                // Allow any origin, header, and method
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowAnyOrigin();
+                });
+            });
+
             services.AddControllers();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -99,6 +111,9 @@ namespace P2PLendingAPI
             }
 
             app.UseHttpsRedirection();
+
+            // use CORS policy
+            app.UseCors();
 
             app.UseRouting();
 

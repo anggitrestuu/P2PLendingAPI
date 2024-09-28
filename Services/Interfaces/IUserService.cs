@@ -12,5 +12,6 @@ namespace P2PLendingAPI.Services.Interfaces
         Task<UserDto> CreateAsync(CreateUserDto createUserDto);
         Task UpdateAsync(string id, UpdateUserDto updateUserDto);
         Task DeleteAsync(string id);
+        Task UpdateBalanceAsync(string id, decimal amount);
     }
 }

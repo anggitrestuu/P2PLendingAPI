@@ -69,5 +69,17 @@ namespace P2PLendingAPI.Services
         {
             await _userRepository.DeleteAsync(id);
         }
+
+        public async Task UpdateBalanceAsync(string id, decimal amount)
+        {
+            var user = await _userRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException("User not found");
+            if (user == null)
+                throw new KeyNotFoundException("User not found");
+
+            user.Balance += amount;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(user);
+        }
     }
 }

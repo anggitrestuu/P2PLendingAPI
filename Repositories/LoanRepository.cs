@@ -47,7 +47,7 @@ namespace P2PLendingAPI.Repositories
 
         public async Task<IEnumerable<Loan>> GetLoansByStatusAsync(string status)
         {
-            return await _context.Loans.Where(l => l.Status == status).ToListAsync();
+            return await _context.Loans.Where(l => l.Status == status).Include(l => l.Borrower).Include(l => l.Lender).ToListAsync();
         }
 
 

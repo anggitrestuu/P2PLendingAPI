@@ -103,6 +103,8 @@ namespace P2PLendingAPI
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -117,7 +119,7 @@ namespace P2PLendingAPI
 
             app.UseRouting();
 
-            app.UseMiddleware<ErrorHandlingMiddleware>();
+
 
             app.UseAuthentication();
             app.UseAuthorization();

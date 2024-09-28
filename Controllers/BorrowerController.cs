@@ -62,8 +62,6 @@ namespace P2PLendingAPI.Controllers
                 return BadRequest("Lender not found");
 
             createLoanDto.LenderId = lender.Id;
-            createLoanDto.Status = "Requested";
-
 
             try
             {

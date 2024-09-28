@@ -53,7 +53,9 @@ namespace P2PLendingAPI.Repositories
 
         public async Task<IEnumerable<Loan>> GetLoansByLenderIdAsync(string lenderId)
         {
-            return await _context.Loans.Where(l => l.LenderId == lenderId).ToListAsync();
+            // return await _context.Loans.Where(l => l.LenderId == lenderId).ToListAsync();
+            // TODO : Join with User table to get the lender details and Repayments table to get the repayments details
+            return await _context.Loans.Where(l => l.LenderId == lenderId).Include(l => l.Borrower).ToListAsync();
         }
     }
 }

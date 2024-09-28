@@ -70,5 +70,39 @@ namespace P2PLendingAPI.Services
             var loanRequests = await _loanRepository.GetLoansByStatusAsync("requested");
             return _mapper.Map<IEnumerable<LoanDto>>(loanRequests);
         }
+
+        public async Task<IEnumerable<LoanDto>> GetLoanHistoryForLenderAsync(string lenderId)
+        {
+            var loans = await _loanRepository.GetLoansByLenderIdAsync(lenderId);
+            return _mapper.Map<IEnumerable<LoanDto>>(loans);
+        }
+
+        public async Task<LoanDto> CreateLoanRequestAsync(CreateLoanDto createLoanDto)
+        {
+            var loan = _mapper.Map<Loan>(createLoanDto);
+            loan.Id = Guid.NewGuid().ToString();
+            loan.Status = "requested";
+            loan.CreatedAt = DateTime.UtcNow;
+            loan.UpdatedAt = DateTime.UtcNow;
+
+            await _loanRepository.CreateAsync(loan);
+            return _mapper.Map<LoanDto>(loan);
+        }
+
+        public async Task<LoanDto> UpdateLoanStatusAsync(string loanId, string status)
+        {
+            var loan = await _loanRepository.GetByIdAsync(loanId);
+            if (loan == null)
+                throw new KeyNotFoundException("Loan not found");
+
+            loan.Status = status;
+            loan.UpdatedAt = DateTime.UtcNow;
+
+            await _loanRepository.UpdateAsync(loan);
+            return _mapper.Map<LoanDto>(loan);
+        }
+
+
+
     }
 }

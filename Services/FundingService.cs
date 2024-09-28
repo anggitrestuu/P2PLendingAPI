@@ -81,5 +81,48 @@ namespace P2PLendingAPI.Services
 
             return _mapper.Map<FundingDto>(createdFunding);
         }
+
+        public async Task FundLoanAsync(string lenderId, string loanId, decimal amount)
+        {
+            var loan = await _loanRepository.GetByIdAsync(loanId);
+            if (loan == null)
+                throw new KeyNotFoundException("Loan not found");
+
+            var lender = await _userRepository.GetByIdAsync(lenderId);
+            if (lender == null)
+                throw new KeyNotFoundException("Lender not found");
+
+            if (lender.Balance < amount)
+                throw new InvalidOperationException("Insufficient balance");
+
+            if (loan.Status != "requested")
+                throw new InvalidOperationException("Loan is not available for funding");
+
+            if (amount != loan.Amount)
+                throw new InvalidOperationException("Funding amount must match loan amount");
+
+            var funding = new Funding
+            {
+                Id = Guid.NewGuid().ToString(),
+                LoanId = loanId,
+                LenderId = lenderId,
+                Amount = amount,
+                FundedAt = DateTime.UtcNow
+            };
+
+            await _fundingRepository.CreateAsync(funding);
+
+            loan.Status = "funded";
+            loan.LenderId = lenderId;
+            loan.UpdatedAt = DateTime.UtcNow;
+            await _loanRepository.UpdateAsync(loan);
+
+            lender.Balance -= amount;
+            await _userRepository.UpdateAsync(lender);
+
+            var borrower = await _userRepository.GetByIdAsync(loan.BorrowerId);
+            borrower.Balance += amount;
+            await _userRepository.UpdateAsync(borrower);
+        }
     }
 }

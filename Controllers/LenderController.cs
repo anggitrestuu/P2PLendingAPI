@@ -1,8 +1,10 @@
+using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using P2PLendingAPI.DTOs;
 using P2PLendingAPI.Services.Interfaces;
-using System.Security.Claims;
 
 namespace P2PLendingAPI.Controllers
 {
@@ -12,14 +14,25 @@ namespace P2PLendingAPI.Controllers
     public class LenderController : ControllerBase
     {
         private readonly ILoanService _loanService;
-        private readonly IFundingService _fundingService;
         private readonly IUserService _userService;
+        private readonly IFundingService _fundingService;
 
-        public LenderController(ILoanService loanService, IFundingService fundingService, IUserService userService)
+        public LenderController(ILoanService loanService, IUserService userService, IFundingService fundingService)
         {
             _loanService = loanService;
-            _fundingService = fundingService;
             _userService = userService;
+            _fundingService = fundingService;
+        }
+
+        [HttpGet("balance")]
+        public async Task<IActionResult> GetBalance()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return Unauthorized();
+
+            var user = await _userService.GetByIdAsync(userId);
+            return Ok(new { Balance = user.Balance });
         }
 
         [HttpGet("loan-requests")]
@@ -29,20 +42,33 @@ namespace P2PLendingAPI.Controllers
             return Ok(loanRequests);
         }
 
-        [HttpGet("fundings")]
-        public async Task<IActionResult> GetLenderFundings()
+        [HttpPost("fund-loan")]
+        public async Task<IActionResult> FundLoan(FundLoanDto fundLoanDto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var fundings = await _fundingService.GetFundingsByLenderIdAsync(userId);
-            return Ok(fundings);
+            var lenderId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (lenderId == null)
+                return Unauthorized();
+
+            try
+            {
+                await _fundingService.FundLoanAsync(lenderId, fundLoanDto.LoanId, fundLoanDto.Amount);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpGet("balance")]
-        public async Task<IActionResult> GetLenderBalance()
+        [HttpGet("loan-history")]
+        public async Task<IActionResult> GetLoanHistory()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var user = await _userService.GetByIdAsync(userId);
-            return Ok(new { Balance = user.Balance });
+            var lenderId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (lenderId == null)
+                return Unauthorized();
+
+            var loanHistory = await _loanService.GetLoanHistoryForLenderAsync(lenderId);
+            return Ok(loanHistory);
         }
     }
 }

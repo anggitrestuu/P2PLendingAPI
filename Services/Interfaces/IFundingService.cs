@@ -10,5 +10,6 @@ namespace P2PLendingAPI.Services.Interfaces
         Task<IEnumerable<FundingDto>> GetAllAsync();
         Task<IEnumerable<FundingDto>> GetFundingsByLenderIdAsync(string lenderId);
         Task<FundingDto> CreateAsync(CreateFundingDto createFundingDto);
+        Task FundLoanAsync(string lenderId, string loanId, decimal amount);
     }
 }

@@ -12,5 +12,8 @@ namespace P2PLendingAPI.Services.Interfaces
         Task<LoanDto> CreateAsync(CreateLoanDto createLoanDto);
         Task UpdateStatusAsync(string id, UpdateLoanStatusDto updateLoanStatusDto);
         Task<IEnumerable<LoanDto>> GetLoanRequestsAsync();
+        Task<IEnumerable<LoanDto>> GetLoanHistoryForLenderAsync(string lenderId);
+        Task<LoanDto> CreateLoanRequestAsync(CreateLoanDto createLoanDto);
+        Task<LoanDto> UpdateLoanStatusAsync(string loanId, string status);
     }
 }

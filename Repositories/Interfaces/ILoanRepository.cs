@@ -12,5 +12,6 @@ namespace P2PLendingAPI.Repositories.Interfaces
         Task<Loan> CreateAsync(Loan loan);
         Task UpdateAsync(Loan loan);
         Task<IEnumerable<Loan>> GetLoansByStatusAsync(string status);
+        Task<IEnumerable<Loan>> GetLoansByLenderIdAsync(string lenderId);
     }
 }
